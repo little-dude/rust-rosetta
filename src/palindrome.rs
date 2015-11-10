@@ -14,7 +14,7 @@ fn palindrome(string: &str) -> bool {
 
     // The word is a palindrome if each tuple contains two times
     // the same character
-    both_directions.all(|(a, b)| {a == b})
+    both_directions.all(|(a, b)| a == b)
 }
 
 // Demonstration code

@@ -34,8 +34,8 @@ fn main() {
                     match Parser::new(input).parse() {
                         Ok(i) if i == 24. => println!("you made it!"),
                         Ok(i) => println!("you entered {}, try again!", i),
-                        Err(s)  => println!("{}", s)
-                    };
+                        Err(s) => println!("{}", s),
+                    }
                 } else {
                     println!("unrecognized input, try again")
                 }
@@ -45,15 +45,16 @@ fn main() {
 }
 
 // Returns true if the entered expression uses the values contained in sample
-pub fn check_values(sample:&mut [u32], input:&str) -> bool {
+pub fn check_values(sample: &mut [u32], input: &str) -> bool {
     let lex = Lexer::new(input);
 
     let mut numbers_used = lex.filter_map(|a| {
-        match a {
-            Token::Int(i) => Some(i),
-            _ => None
-        }
-    }).collect::<Vec<u32>>();
+                                  match a {
+                                      Token::Int(i) => Some(i),
+                                      _ => None,
+                                  }
+                              })
+                              .collect::<Vec<u32>>();
 
     numbers_used.sort();
     sample.sort();
@@ -69,20 +70,21 @@ pub enum Token {
     Minus,
     Slash,
     Star,
-    Int(u32)
+    Int(u32),
 }
 
 impl Token {
-   // are tokens associated to a binary operation?
-   fn is_binary(&self) -> bool {
+    // are tokens associated to a binary operation?
+    fn is_binary(&self) -> bool {
         match *self {
             Token::Plus | Token::Minus | Token::Slash | Token::Star => true,
-            _ => false
+            _ => false,
         }
     }
 }
 
-trait Tokenable { fn as_token(&self) -> Option<Token>; }
+trait Tokenable {
+    fn as_token(&self) -> Option<Token>; }
 
 // map a character to its corresponding token
 impl Tokenable for char {
@@ -95,7 +97,7 @@ impl Tokenable for char {
             '-' => Token::Minus,
             '/' => Token::Slash,
             '*' => Token::Star,
-            _ => return None
+            _ => return None,
         };
 
         Some(tok)
@@ -108,21 +110,22 @@ impl Tokenable for char {
 #[derive(Copy, Clone)]
 pub struct Lexer<'a> {
     input: &'a str,
-    offset: usize
+    offset: usize,
 }
 
 impl <'a> Lexer<'a> {
     pub fn new(input: &str) -> Lexer {
-        Lexer { input: input, offset: 0 }
+        Lexer {
+            input: input,
+            offset: 0,
+        }
     }
 
-    fn expect(&mut self, expected:&[Token]) -> Result<Token, String> {
+    fn expect(&mut self, expected: &[Token]) -> Result<Token, String> {
         let n = self.offset;
         match self.next() {
-            Some(a) if expected.contains(&a)  => Ok(a),
-            other  => Err(format!("Parsing error: {:?} was unexpected at offset {}",
-                                  other,
-                                  n))
+            Some(a) if expected.contains(&a) => Ok(a),
+            other => Err(format!("Parsing error: {:?} was unexpected at offset {}", other, n)),
         }
     }
 }
@@ -133,10 +136,8 @@ impl <'a> Iterator for Lexer<'a> {
     fn next(&mut self) -> Option<Token> {
         // slice the original string starting from the current offset
         let mut remaining = self.input[self.offset..]
-                                      // keep track of the original indice
-                                      .char_indices()
-                                      // advance to the next non-whitespace char
-                                      .skip_while(|&(_, ch)| ch.is_whitespace());
+                                .char_indices()
+                                .skip_while(|&(_, ch)| ch.is_whitespace());
 
         let (tok, cur_offset) = match remaining.next() {
             // Found a digit. if there are others, transform them to `u32`
@@ -158,10 +159,10 @@ impl <'a> Iterator for Lexer<'a> {
                     offset = 1;
                 }
                 (Some(Token::Int(val)), offset)
-            },
+            }
             // found non-digit, try transforming it to the corresponding token
             Some((o, ch)) => (ch.as_token(), o + 1),
-            _   => (None, 0)
+            _ => (None, 0),
         };
 
         // update the offset for the next iteration
@@ -180,16 +181,16 @@ pub enum Operator {
     Sub,
     Mul,
     Div,
-    Sentinel
+    Sentinel,
 }
 
 impl Operator {
-     fn precedence(&self) -> usize  {
+    fn precedence(&self) -> usize {
         match *self {
             Operator::Sentinel => 0,
             Operator::Add | Operator::Sub => 1,
             Operator::Neg => 2,
-            Operator::Mul | Operator::Div => 3
+            Operator::Mul | Operator::Div => 3,
         }
     }
 }
@@ -204,7 +205,7 @@ impl PartialOrd for Operator {
     fn partial_cmp(&self, other: &Operator) -> Option<Ordering> {
         match (self.precedence(), other.precedence()) {
             (a, b) if a == b => Some(Greater),
-            (a, b) => a.partial_cmp(&b)
+            (a, b) => a.partial_cmp(&b),
         }
     }
 }
@@ -217,7 +218,7 @@ impl PartialOrd for Operator {
 pub struct Parser<'a> {
     operators: Vec<Operator>,
     operands: Vec<f32>,
-    lexer: Lexer<'a>
+    lexer: Lexer<'a>,
 }
 
 impl <'a> Parser<'a> {
@@ -225,7 +226,7 @@ impl <'a> Parser<'a> {
         Parser {
             operators: vec![],
             operands: vec![],
-            lexer: Lexer::new(input)
+            lexer: Lexer::new(input),
         }
     }
 
@@ -234,8 +235,8 @@ impl <'a> Parser<'a> {
         try!(self.e());
         return match self.operands.last() {
             Some(r) => Ok(*r),
-            None => Err("something went wrong, got no result".to_string())
-        }
+            None => Err("something went wrong, got no result".to_string()),
+        };
     }
 
     fn e(&mut self) -> Result<(), String> {
@@ -250,7 +251,7 @@ impl <'a> Parser<'a> {
                         Token::Star => Operator::Mul,
                         Token::Slash => Operator::Div,
                         // there are no other binary operators
-                        _ => unreachable!()
+                        _ => unreachable!(),
                     };
 
                     self.push_operator(op);
@@ -259,14 +260,14 @@ impl <'a> Parser<'a> {
                     self.lexer.next();
                     try!(self.p());
                 }
-                _ => break
+                _ => break,
             }
         }
 
         loop {
             match self.operators.last() {
                 Some(&op) if op != Operator::Sentinel => self.pop_operator(),
-                _ => return Ok(())
+                _ => return Ok(()),
             }
         }
     }
@@ -279,13 +280,13 @@ impl <'a> Parser<'a> {
                 try!(self.e());
                 try!(self.lexer.expect(&[Token::RParen]));
                 self.operators.pop();
-            },
+            }
             Some(Token::Minus) => {
                 self.push_operator(Operator::Neg);
                 try!(self.p());
-            },
+            }
             Some(e) => return Err(format!("unexpected token {:?}", e)),
-            _ => return Err("unexpected end of command".to_string())
+            _ => return Err("unexpected end of command".to_string()),
         }
         Ok(())
     }
@@ -297,7 +298,7 @@ impl <'a> Parser<'a> {
             Some(Operator::Mul) => self.binary_op(|t1, t2| t1 * t2),
             Some(Operator::Div) => self.binary_op(|t1, t2| t1 / t2),
             Some(Operator::Neg) => self.unary_op(|t1| -t1),
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 
@@ -310,18 +311,22 @@ impl <'a> Parser<'a> {
     }
 
     #[inline]
-    fn binary_op<F>(&mut self, op: F) where F: Fn(f32, f32) -> f32 {
+    fn binary_op<F>(&mut self, op: F)
+        where F: Fn(f32, f32) -> f32
+    {
         match (self.operands.pop(), self.operands.pop()) {
             (Some(t1), Some(t2)) => self.operands.push(op(t2, t1)),
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 
     #[inline]
-    fn unary_op<F>(&mut self, op: F) where F: Fn(f32) -> f32 {
+    fn unary_op<F>(&mut self, op: F)
+        where F: Fn(f32) -> f32
+    {
         match self.operands.pop() {
             Some(t1) => self.operands.push(op(t1)),
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }
@@ -331,7 +336,7 @@ impl <'a> Parser<'a> {
 mod test {
     use super::{Token, Lexer, Parser};
     use super::Operator::{Add, Sub, Mul, Div};
-    use super::{check_values};
+    use super::check_values;
     use super::Token::{LParen, RParen, Plus, Slash, Star, Int};
 
     #[test]
@@ -358,7 +363,7 @@ mod test {
         let tok = &mut Lexer::new("  15 + 4");
         t(tok, Int(15), 4);
         t(tok, Plus, 6);
-        let read = tok.expect(&[LParen,Int(4),RParen]);
+        let read = tok.expect(&[LParen, Int(4), RParen]);
         assert_eq!(read, Ok(Int(4)));
 
         let mut tok = Lexer::new("");

@@ -21,6 +21,6 @@ fn main() {
     match fs::read_dir(dir).map(|paths| paths.count()) {
         Err(e) => println!("Error: {}", e),
         Ok(0) => println!("Directory is empty"),
-        Ok(_) => println!("Directory is not empty")
+        Ok(_) => println!("Directory is not empty"),
     }
 }

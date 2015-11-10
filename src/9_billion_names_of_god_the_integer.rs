@@ -9,7 +9,7 @@ pub struct Solver {
     // The `cache` is a private implementation detail,
     // it would be an improvement to throw away unused values
     // from the cache (to reduce memory for larger inputs)
-    cache: Vec<Vec<BigUint>>
+    cache: Vec<Vec<BigUint>>,
 }
 
 impl Solver {
@@ -22,10 +22,11 @@ impl Solver {
     pub fn row_string(&mut self, idx: usize) -> String {
         let r = self.cumulative(idx);
 
-        (0..idx).map(|i| &r[i+1] - &r[i])
-                     .map(|n| n.to_string())
-                     .collect::<Vec<String>>()
-                     .join(", ")
+        (0..idx)
+            .map(|i| &r[i + 1] - &r[i])
+            .map(|n| n.to_string())
+            .collect::<Vec<String>>()
+            .join(", ")
     }
 
     // Convenience method to access the last column in a culmulated calculation
@@ -35,13 +36,13 @@ impl Solver {
     }
 
     fn cumulative(&mut self, idx: usize) -> &[BigUint] {
-        for l in (self.cache.len()..idx+1) {
-            let mut r : Vec<BigUint> = vec![Zero::zero()];
+        for l in (self.cache.len()..idx + 1) {
+            let mut r: Vec<BigUint> = vec![Zero::zero()];
 
-            for x in (1..l+1) {
+            for x in (1..l + 1) {
                 let w = {
-                    let y = &r[x-1];
-                    let z = &self.cache[l-x][min(x, l-x)];
+                    let y = &r[x - 1];
+                    let z = &self.cache[l - x][min(x, l - x)];
                     y + z
                 };
                 r.push(w)

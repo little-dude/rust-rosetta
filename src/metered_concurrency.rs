@@ -21,7 +21,10 @@ impl CountingSemaphore {
     // Create a semaphore with `max` available resources and a linearly increasing backoff of
     // `backoff` (used during spinlock contention).
     pub fn new(max: usize, backoff: u32) -> CountingSemaphore {
-        CountingSemaphore { count: AtomicUsize::new(max), backoff: backoff }
+        CountingSemaphore {
+            count: AtomicUsize::new(max),
+            backoff: backoff,
+        }
     }
 
     // Acquire a resource, returning a RAII CountingSemaphoreGuard.
@@ -33,13 +36,13 @@ impl CountingSemaphore {
             let count = self.count.load(SeqCst);
             // The check for 0 is necessary to make sure we don't go negative, which is why this
             // must be a compare-and-swap rather than a straight decrement.
-            if count == 0 || self.count.compare_and_swap(count, count-1, SeqCst) != count {
+            if count == 0 || self.count.compare_and_swap(count, count - 1, SeqCst) != count {
                 // Linear backoff a la Servo's spinlock contention.
                 thread::sleep_ms(backoff);
                 backoff = backoff + self.backoff;
             } else {
                 // We successfully acquired the resource.
-                break
+                break;
             }
         }
         CountingSemaphoreGuard { sem: self }

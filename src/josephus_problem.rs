@@ -5,9 +5,9 @@
 // `josephus(n, k) == if n < 2 { 0 } else { (josephus(n - 1, k) + k) % n }`
 fn josephus(n: u32, k: u32) -> u32 {
     let mut result = 0u32;
-    for i in 2..(n+1) {
+    for i in 2..(n + 1) {
         result = (result + k) % i;
-    };
+    }
     result
 }
 

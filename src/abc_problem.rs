@@ -2,13 +2,12 @@
 
 use std::collections::HashSet;
 
-const  WORDS: &'static [&'static str] = &["A", "BARK", "BOOK", "TREAT",
-                                         "COMMON", "SQUAD", "CONFUSE"];
+const WORDS: &'static [&'static str] = &["A", "BARK", "BOOK", "TREAT", "COMMON", "SQUAD",
+                                         "CONFUSE"];
 
-const  BLOCKS: &'static [&'static str] = &["BO", "XK", "DQ", "CP", "NA",
-                                           "GT", "RE", "TG", "QD", "FS",
-                                           "JW", "HU", "VI", "AN", "OB",
-                                           "ER", "FS", "LY", "PC", "ZM"];
+const BLOCKS: &'static [&'static str] = &["BO", "XK", "DQ", "CP", "NA", "GT", "RE", "TG", "QD",
+                                          "FS", "JW", "HU", "VI", "AN", "OB", "ER", "FS", "LY",
+                                          "PC", "ZM"];
 
 #[cfg(not(test))]
 fn main() {
@@ -19,7 +18,9 @@ fn main() {
 
     println!("\n******\nmethod 2\n******");
     for word in WORDS {
-        println!("can {} be built? {}", word, can_be_built_blocks_first(*word))
+        println!("can {} be built? {}",
+                 word,
+                 can_be_built_blocks_first(*word))
     }
 }
 
@@ -34,7 +35,7 @@ fn can_be_built_input_first(input: &str) -> bool {
         for (ind, block) in BLOCKS.iter().enumerate() {
             if !used.contains(&ind) && block.contains(chr) {
                 used.insert(ind);
-                break
+                break;
             }
         }
     }
@@ -55,12 +56,11 @@ fn can_be_built_blocks_first(input: &str) -> bool {
 
     BLOCKS.iter().any(|block| {
         for letter in block.chars() {
-            let needle = input.char_indices().find(|&(i, c)| {
-                // See if any of the letters in the block can be used for this word
-                c == letter
-                // and that the letter hasn't been already matched by another block
-                && !matched.contains(&i)
-            });
+            let needle =
+                input.char_indices().find(|&(i, c)| {
+                    // See if any of the letters in the block can be used for this word
+                    c == letter && !matched.contains(&i)
+                });
 
             match needle {
                 Some((idx, _)) => {
@@ -68,10 +68,10 @@ fn can_be_built_blocks_first(input: &str) -> bool {
                     matched.insert(idx);
                     // don't check the other letter in this block
                     // (we can use one character per block)
-                    break
+                    break;
                 }
                 _ => {}
-            };
+            }
         }
 
         // The iterator will halt if/when this becomes true, so it will early

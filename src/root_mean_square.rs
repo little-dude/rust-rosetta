@@ -13,7 +13,7 @@ fn rms(list: &[f64]) -> Option<f64> {
 
 #[cfg(not(test))]
 fn main() {
-    let input:Vec<_> = (1..11).map(|x| x as f64).collect();
+    let input: Vec<_> = (1..11).map(|x| x as f64).collect();
 
     // 6.2048368229954285
     let rms = rms(&input).unwrap();

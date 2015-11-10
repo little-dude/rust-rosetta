@@ -7,7 +7,8 @@ extern crate rustc_serialize;
 pub mod rosetta_code;
 
 #[allow(dead_code)]
-fn main() { }
+fn main() {
+}
 
 #[cfg(test)]
 mod test {
@@ -37,9 +38,17 @@ mod test {
     // Returns the names of the source files in the `src` directory
     fn get_source_files() -> HashSet<String> {
         let paths = fs::read_dir("./src").unwrap();
-        paths.map(|p| p.unwrap().path().file_name().unwrap().to_os_string()
-                    .into_string().unwrap())
-                    .filter(|s| s[..].ends_with(".rs")).collect()
+        paths.map(|p| {
+                 p.unwrap()
+                  .path()
+                  .file_name()
+                  .unwrap()
+                  .to_os_string()
+                  .into_string()
+                  .unwrap()
+             })
+             .filter(|s| s[..].ends_with(".rs"))
+             .collect()
     }
 
     // Returns the paths of the source files referenced in Cargo.toml
@@ -47,20 +56,26 @@ mod test {
         let c_toml = File::open("./Cargo.toml").unwrap();
         let reader = BufReader::new(c_toml);
         let regex = Regex::new("path = \"(.*)\"").unwrap();
-        reader.lines().filter_map(|l| {
-            let l = l.unwrap();
-            regex.captures(&l).map(|c| c.at(1).map(|s| Path::new(s))
-                                               .unwrap()
-                                               .file_name()
-                                               .unwrap()
-                                               .to_string_lossy()
-                                               .into_owned())
-        }).collect()
+        reader.lines()
+              .filter_map(|l| {
+                  let l = l.unwrap();
+                  regex.captures(&l).map(|c| {
+                      c.at(1)
+                       .map(|s| Path::new(s))
+                       .unwrap()
+                       .file_name()
+                       .unwrap()
+                       .to_string_lossy()
+                       .into_owned()
+                  })
+              })
+              .collect()
     }
 
     // Returns the filenames of the source files which are not covered by Cargo.toml
-    fn get_not_covered<'a>(sources: &'a HashSet<String>, paths: &'a HashSet<String>) ->
-                           HashSet<&'a String> {
+    fn get_not_covered<'a>(sources: &'a HashSet<String>,
+                           paths: &'a HashSet<String>)
+                           -> HashSet<&'a String> {
         sources.difference(paths).collect()
     }
 }

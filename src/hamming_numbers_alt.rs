@@ -22,13 +22,13 @@ mod hamming_numbers;
 #[cfg(not(test))]
 fn main() {
     // capacity of the queue currently needs to be a power of 2 because of a bug with VecDeque
-    let hamming : Hamming<HammingTriple> = Hamming::new(128);
+    let hamming: Hamming<HammingTriple> = Hamming::new(128);
 
     for (idx, h) in hamming.enumerate().take(1_000_000) {
         match idx + 1 {
             1...20 => print!("{} ", h.to_biguint().unwrap()),
             i @ 1691 | i @ 1_000_000 => println!("\n{}th number: {}", i, h.to_biguint().unwrap()),
-            _ =>  continue
+            _ => continue,
         }
     }
 }
@@ -50,16 +50,18 @@ pub struct HammingTriple {
     pow_2: usize,
     pow_3: usize,
     pow_5: usize,
-    ln: f64
+    ln: f64,
 }
 
 impl Mul for HammingTriple {
     type Output = HammingTriple;
     fn mul(self, other: HammingTriple) -> HammingTriple {
-        HammingTriple{ pow_2: self.pow_2 + other.pow_2,
+        HammingTriple {
+            pow_2: self.pow_2 + other.pow_2,
             pow_3: self.pow_3 + other.pow_3,
             pow_5: self.pow_5 + other.pow_5,
-            ln: self.ln + other.ln }
+            ln: self.ln + other.ln,
+        }
     }
 }
 
@@ -73,18 +75,33 @@ impl One for HammingTriple {
 
 impl HammingNumber for HammingTriple {
     fn multipliers() -> (HammingTriple, HammingTriple, HammingTriple) {
-        (HammingTriple { pow_2: 1, pow_3: 0, pow_5: 0, ln: LN_2 },
-        HammingTriple { pow_2: 0, pow_3: 1, pow_5: 0, ln: LN_3 },
-        HammingTriple { pow_2: 0, pow_3: 0, pow_5: 1, ln: LN_5 })
+        (HammingTriple {
+            pow_2: 1,
+            pow_3: 0,
+            pow_5: 0,
+            ln: LN_2,
+        },
+         HammingTriple {
+            pow_2: 0,
+            pow_3: 1,
+            pow_5: 0,
+            ln: LN_3,
+        },
+         HammingTriple {
+            pow_2: 0,
+            pow_3: 0,
+            pow_5: 1,
+            ln: LN_5,
+        })
     }
 }
 
 impl ToBigUint for HammingTriple {
-   // calculate the value as a BigUint
+    // calculate the value as a BigUint
     fn to_biguint(&self) -> Option<BigUint> {
         Some(pow(2u8.to_biguint().unwrap(), self.pow_2) *
-        pow(3u8.to_biguint().unwrap(), self.pow_3) *
-        pow(5u8.to_biguint().unwrap(), self.pow_5))
+             pow(3u8.to_biguint().unwrap(), self.pow_3) *
+             pow(5u8.to_biguint().unwrap(), self.pow_5))
     }
 }
 
@@ -94,7 +111,7 @@ impl HammingTriple {
             pow_2: pow_2,
             pow_3: pow_3,
             pow_5: pow_5,
-            ln: (pow_2 as f64) * LN_2 + (pow_3 as f64) * LN_3 + (pow_5 as f64) * LN_5
+            ln: (pow_2 as f64) * LN_2 + (pow_3 as f64) * LN_3 + (pow_5 as f64) * LN_5,
         }
     }
 }
@@ -102,14 +119,14 @@ impl HammingTriple {
 impl Clone for HammingTriple {
     /// Return a deep copy of the value.
     #[inline]
-    fn clone(&self) -> HammingTriple { *self }
+    fn clone(&self) -> HammingTriple {
+        *self
+    }
 }
 
 impl PartialEq for HammingTriple {
     fn eq(&self, other: &HammingTriple) -> bool {
-        self.pow_2 == other.pow_2 &&
-        self.pow_3 == other.pow_3 &&
-        self.pow_5 == other.pow_5
+        self.pow_2 == other.pow_2 && self.pow_3 == other.pow_3 && self.pow_5 == other.pow_5
     }
 }
 
@@ -117,14 +134,19 @@ impl Eq for HammingTriple {}
 
 impl PartialOrd for HammingTriple {
     fn partial_cmp(&self, other: &HammingTriple) -> Option<Ordering> {
-        if self == other { Some(Equal) }
-        else if self.pow_2 >= other.pow_2 && self.pow_3 >= other.pow_3 &&
-            self.pow_5 >= other.pow_5 { Some(Greater) }
-        else if self.pow_2 <= other.pow_2 && self.pow_3 <= other.pow_3 &&
-            self.pow_5 <= other.pow_5 { Some(Less) }
-        else if self.ln > other.ln { Some(Greater) }
-        else if self.ln < other.ln { Some(Less) }
-        else { None }
+        if self == other {
+            Some(Equal)
+        } else if self.pow_2 >= other.pow_2 && self.pow_3 >= other.pow_3 && self.pow_5 >= other.pow_5 {
+            Some(Greater)
+        } else if self.pow_2 <= other.pow_2 && self.pow_3 <= other.pow_3 && self.pow_5 <= other.pow_5 {
+            Some(Less)
+        } else if self.ln > other.ln {
+            Some(Greater)
+        } else if self.ln < other.ln {
+            Some(Less)
+        } else {
+            None
+        }
     }
 }
 
@@ -133,9 +155,8 @@ impl Ord for HammingTriple {
         // as a last resort we need to calculate the BigUint values and compare them.
         // This should be rare. The reason is that for very big values floating point precision
         // could make hamming_1.ln == hamming_2.ln even if the two numbers are actually different
-        self.partial_cmp(other).unwrap_or_else( ||
-            self.to_biguint().unwrap().cmp(&other.to_biguint().unwrap())
-        )
+        self.partial_cmp(other)
+            .unwrap_or_else(|| self.to_biguint().unwrap().cmp(&other.to_biguint().unwrap()))
     }
 }
 
@@ -151,7 +172,8 @@ fn hamming_iter_1million() {
     let mut hamming = Hamming::<HammingTriple>::new(128);
     // one-million-th hamming number has index 999_999 because indexes are zero-based
     assert_eq!(hamming.nth(999_999).unwrap().to_biguint(),
-        "519312780448388736089589843750000000000000000000000000000000000000000000000000000000"
-        .parse::<BigUint>().ok()
-        );
+               "519312780448388736089589843750000000000000000000000000000000000000000000000000000\
+                000"
+                   .parse::<BigUint>()
+                   .ok());
 }

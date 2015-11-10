@@ -10,7 +10,7 @@ use std::io::{BufReader, BufRead};
 fn benford_freq(d: u64) -> f32 {
     assert!(d >= 1 && d <= 9);
 
-    (1.0 + 1.0/(d as f32)).log10()
+    (1.0 + 1.0 / (d as f32)).log10()
 }
 
 // Returns the leading digit of any number
@@ -56,10 +56,12 @@ fn main() {
     let filename = "../src/resources/fib1000.txt";
     let file = BufReader::new(File::open(filename).unwrap());
 
-    let fibs: Vec<u64> = file.lines().map(|x| {
-        let s = x.unwrap();
-        s[0..1].parse::<u64>().unwrap()
-    }).collect();
+    let fibs: Vec<u64> = file.lines()
+                             .map(|x| {
+                                 let s = x.unwrap();
+                                 s[0..1].parse::<u64>().unwrap()
+                             })
+                             .collect();
 
     // Calculate freuencies of first digits in test data
 
@@ -76,6 +78,9 @@ fn main() {
         let delta_pc = expected_pc - found_pc;
 
         println!("{}        {:>4.1}%      {:>4.1}%    {:>5.2}%",
-                 digit, expected_pc, found_pc, delta_pc);
+                 digit,
+                 expected_pc,
+                 found_pc,
+                 delta_pc);
     }
 }

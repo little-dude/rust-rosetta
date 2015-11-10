@@ -3,7 +3,8 @@
 use std::mem;
 
 // Use VT100 cursor control sequences to animate in-place
-#[cfg(not(test))] const ANIMATE: bool = true;
+#[cfg(not(test))]
+const ANIMATE: bool = true;
 
 #[derive(Copy, Clone)]
 enum Cell {
@@ -32,20 +33,33 @@ impl Cell {
 }
 
 fn next_world(input: &[Cell], output: &mut [Cell], w: usize, h: usize) {
-    for i in 0..(w*h) {
+    for i in 0..(w * h) {
         match input[i] {
-            Cell::Empty(c)  => output[i] = Cell::Empty(c),
-            Cell::Tail      => output[i] = Cell::Conductor,
-            Cell::Head      => output[i] = Cell::Tail,
+            Cell::Empty(c) => output[i] = Cell::Empty(c),
+            Cell::Tail => output[i] = Cell::Conductor,
+            Cell::Head => output[i] = Cell::Tail,
             Cell::Conductor => {
-                let nc = vec![
-                    input.get(i-w-1), input.get(i-w), input.get(i-w+1),
-                    input.get(i-1),                   input.get(i+1),
-                    input.get(i+w-1), input.get(i+w), input.get(i+w+1)
-                ].iter().fold(0, |sum, &o| {
-                    if let Some(&Cell::Head) = o { sum + 1 } else { sum }
-                });
-                output[i] = if nc == 1 || nc == 2 { Cell::Head } else { Cell::Conductor };
+                let nc = vec![input.get(i - w - 1),
+                              input.get(i - w),
+                              input.get(i - w + 1),
+                              input.get(i - 1),
+                              input.get(i + 1),
+                              input.get(i + w - 1),
+                              input.get(i + w),
+                              input.get(i + w + 1)]
+                             .iter()
+                             .fold(0, |sum, &o| {
+                                 if let Some(&Cell::Head) = o {
+                                     sum + 1
+                                 } else {
+                                     sum
+                                 }
+                             });
+                output[i] = if nc == 1 || nc == 2 {
+                    Cell::Head
+                } else {
+                    Cell::Conductor
+                };
             }
         }
     }
@@ -60,14 +74,18 @@ fn main() {
 |tH.........|
 |.   .      |
 |   ...     |
-|.   .      |
+|.   .      \
+                                |
 |Ht.. ......|
 +-----------+
-".chars().map(|c| Cell::from_char(c)).collect();
+"
+                                   .chars()
+                                   .map(|c| Cell::from_char(c))
+                                   .collect();
     let mut next: Vec<Cell> = world.clone();
 
     loop {
-        for i in 0..(w*h) {
+        for i in 0..(w * h) {
             print!("{}", world[i].to_char());
         }
         print!("\n");
@@ -90,10 +108,14 @@ fn test() {
 |tH.........|
 |.   .      |
 |   ...     |
-|.   .      |
+|.   .      \
+                                |
 |Ht.. ......|
 +-----------+
-".chars().map(|c| Cell::from_char(c)).collect();
+"
+                                   .chars()
+                                   .map(|c| Cell::from_char(c))
+                                   .collect();
     let mut next: Vec<Cell> = world.clone();
 
     for _ in 0..10 {
@@ -108,7 +130,8 @@ fn test() {
 |H   t      |
 |   HHH     |
 |H   .      |
-|t.tH ......|
+|t.tH \
+                   ......|
 +-----------+
 ";
     assert_eq!(result, correct);

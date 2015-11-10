@@ -53,7 +53,7 @@ enum Error {
     IoError, // Some other kind of I/O error
     IncorrectCloseDelimiter, // ) appeared where it shouldn't (usually as the first token)
     UnexpectedEOF, // Usually means a missing ), but could also mean there were no tokens at all.
-    ExpectedEOF, // More tokens after the list is finished, or after a literal if there is no list.
+    ExpectedEOF, /* More tokens after the list is finished, or after a literal if there is no list. */
 }
 
 impl From<io::Error> for Error {
@@ -85,8 +85,16 @@ impl<'a> Tokens<'a> {
     // Initialize a token stream for a given string.
     fn new(string: &str) -> Tokens {
         match string.slice_shift_char() {
-            Some((ch, s)) =>  Tokens { string: string, first: Some(ch), rest: s },
-            None => Tokens { string: string, first: None, rest: string }
+            Some((ch, s)) => Tokens {
+                string: string,
+                first: Some(ch),
+                rest: s,
+            },
+            None => Tokens {
+                string: string,
+                first: None,
+                rest: string,
+            },
         }
     }
 
@@ -101,7 +109,7 @@ impl<'a> Tokens<'a> {
             self.rest = s;
         } else {
             self.first = None;
-        };
+        }
     }
 
     // This is where the lexing happens.  Note that it does not handle string escaping.
@@ -111,13 +119,13 @@ impl<'a> Tokens<'a> {
                 // List start
                 Some('(') => {
                     self.update(self.rest);
-                    return Ok(ListStart)
-                },
+                    return Ok(ListStart);
+                }
                 // List end
                 Some(')') => {
                     self.update(self.rest);
-                    return Ok(ListEnd)
-                },
+                    return Ok(ListEnd);
+                }
                 // Quoted literal start
                 Some('"') => {
                     // Split the string at most once.  This lets us get a
@@ -131,17 +139,17 @@ impl<'a> Tokens<'a> {
                         // handle string escaping, we would have to allocate at some point though.
                         Some(s) => {
                             self.update(s);
-                            return Ok(Literal(Str(str)))
-                        },
-                        None => return Err(UnterminatedStringLiteral)
+                            return Ok(Literal(Str(str)));
+                        }
+                        None => return Err(UnterminatedStringLiteral),
                     }
-                },
+                }
                 // Plain old literal start
                 Some(c) => {
                     // Skip whitespace.  This could probably be made more efficient.
                     if c.is_whitespace() {
                         self.update(self.rest);
-                        continue
+                        continue;
                     }
                     // Since we've exhausted all other possibilities, this must be a real literal.
                     // Unlike the quoted case, it's not an error to encounter EOF before whitespace.
@@ -149,7 +157,9 @@ impl<'a> Tokens<'a> {
                     let str = {
                         let mut iter = self.string.splitn(2, |ch: char| {
                             let term = ch == ')' || ch == '(';
-                            if term { end_ch = Some(ch) }
+                            if term {
+                                end_ch = Some(ch)
+                            }
                             term || ch.is_whitespace()
                         });
                         // The first time splitn is run it will never return None, so this is safe.
@@ -164,11 +174,11 @@ impl<'a> Tokens<'a> {
                         // at self.string.  In a real implementation this would be enforced by
                         // visibility rules.
                         Some(_) => self.first = end_ch,
-                        None => self.update(self.rest)
+                        None => self.update(self.rest),
                     }
                     return Ok(Literal(parse_literal(str)));
                 }
-                None => return Ok(EOF)
+                None => return Ok(EOF),
             }
         }
     }
@@ -180,9 +190,9 @@ fn parse_literal(literal: &str) -> SExp {
     match literal.bytes().next() {
         Some(b'0'...b'9') | Some(b'-') => match f64::from_str(literal) {
             Ok(f) => F64(f),
-            Err(_) => Str(literal)
+            Err(_) => Str(literal),
         },
-        _ => Str(literal)
+        _ => Str(literal),
     }
 }
 
@@ -196,7 +206,11 @@ struct ParseContext<'a> {
 impl<'a> ParseContext<'a> {
     // Create a new parse context from a given string
     fn new(string: &'a str) -> ParseContext<'a> {
-        ParseContext { string: string, arena: None, stack: Vec::new() }
+        ParseContext {
+            string: string,
+            arena: None,
+            stack: Vec::new(),
+        }
     }
 }
 
@@ -206,7 +220,10 @@ impl<'a> SExp<'a> {
         match *self {
             F64(f) => match f.classify() {
                 // We don't want to identify NaN, Infinity, etc. as floats.
-                FpCategory::Normal | FpCategory::Zero => { try!(write!(writer, "{}", f)); Ok(()) },
+                FpCategory::Normal | FpCategory::Zero => {
+                    try!(write!(writer, "{}", f));
+                    Ok(())
+                }
                 _ => Err(Error::NoReprForFloat),
             },
             List(ref l) => {
@@ -214,7 +231,7 @@ impl<'a> SExp<'a> {
                 // recursively call encode on each member, and then write a right parenthesis.  The
                 // only reason the logic is as long as it is is to make sure we don't write
                 // unnecessary spaces between parentheses in the zero or one element cases.
-                try!(write!(writer,"{}",'('));
+                try!(write!(writer, "{}", '('));
                 let mut iter = l.iter();
                 match iter.next() {
                     Some(sexp) => {
@@ -223,13 +240,16 @@ impl<'a> SExp<'a> {
                             try!(write!(writer, "{}", ' '));
                             try!(sexp.encode(writer));
                         }
-                    },
+                    }
                     None => (),
                 }
-                try!(write!(writer,"{}", ')'));
+                try!(write!(writer, "{}", ')'));
                 Ok(())
-            },
-            Str(s) => { try!(write!(writer, "\"{}\"", s)); Ok(())} ,
+            }
+            Str(s) => {
+                try!(write!(writer, "\"{}\"", s));
+                Ok(())
+            }
         }
     }
 
@@ -240,7 +260,7 @@ impl<'a> SExp<'a> {
         // unreachable.
         let arena = match ctx.arena {
             Some(ref mut arena) => arena,
-            None => unreachable!()
+            None => unreachable!(),
         };
         let ParseContext {string, ref mut stack, .. } = *ctx;
         // Make sure the stack is cleared--we keep it in the context to avoid unnecessary
@@ -253,7 +273,11 @@ impl<'a> SExp<'a> {
         let next = tokens.next();
         let mut list = match try!(next) {
             ListStart => Vec::new(),
-            Literal(s) => return if try!(tokens.next()) == EOF { Ok(s) } else { Err(ExpectedEOF) },
+            Literal(s) => return if try!(tokens.next()) == EOF {
+                Ok(s)
+            } else {
+                Err(ExpectedEOF)
+            },
             ListEnd => return Err(IncorrectCloseDelimiter),
             EOF => return Err(UnexpectedEOF),
         };
@@ -266,7 +290,7 @@ impl<'a> SExp<'a> {
                     // We push the previous context onto our stack when we start reading a new list.
                     stack.push(list);
                     list = Vec::new()
-                },
+                }
                 Literal(s) => list.push(s), // Plain old literal, push it onto the current list
                 ListEnd => match stack.pop() { // Pop the old context off the stack on list end.
                     Some(mut l) => {
@@ -275,13 +299,13 @@ impl<'a> SExp<'a> {
                         l.push(List(&*arena.alloc(list)));
                         // Now reset the current list to the parent list
                         list = l;
-                    },
+                    }
                     // There was nothing on the stack, so we're at the end of the topmost list.
                     // The check to make sure there are no more tokens is required for correctness.
                     None => return match try!(tokens.next()) {
                         EOF => Ok(List(&*arena.alloc(list))),
                         _ => Err(ExpectedEOF),
-                    }
+                    },
                 },
                 // We encountered an EOF before the list ended--that's an error.
                 EOF => return Err(UnexpectedEOF),
@@ -300,10 +324,15 @@ impl<'a> SExp<'a> {
     }
 }
 
-const SEXP_STRUCT: SExp<'static> = List(&[
-    List(&[Str("data"), Str("quoted data"), F64(123.), F64(4.5)]),
-    List(&[Str("data"), List(&[Str("!@#"), List(&[F64(4.5)]), Str("(more"), Str("data)")])]),
-]);
+const SEXP_STRUCT: SExp<'static> = List(&[List(&[Str("data"),
+                                                 Str("quoted data"),
+                                                 F64(123.),
+                                                 F64(4.5)]),
+                                          List(&[Str("data"),
+                                                 List(&[Str("!@#"),
+                                                        List(&[F64(4.5)]),
+                                                        Str("(more"),
+                                                        Str("data)")])])]);
 
 fn try_encode() -> Result<String, Error> {
     SEXP_STRUCT.buffer_encode()
@@ -324,8 +353,7 @@ fn main() {
 }
 
 #[bench]
-fn bench_decode(b: &mut test::Bencher)
-{
+fn bench_decode(b: &mut test::Bencher) {
     b.iter(|| {
         let ref mut ctx = ParseContext::new(SEXP_STRING_IN);
         assert!(try_decode(ctx).is_ok());
@@ -333,8 +361,7 @@ fn bench_decode(b: &mut test::Bencher)
 }
 
 #[bench]
-fn bench_encode(b: &mut test::Bencher)
-{
+fn bench_encode(b: &mut test::Bencher) {
     b.iter(|| {
         assert!(try_encode().is_ok());
     })
@@ -343,7 +370,7 @@ fn bench_encode(b: &mut test::Bencher)
 #[test]
 fn test_sexp_encode() {
     const SEXP_STRING: &'static str =
-r#"(("data" "quoted data" 123 4.5) ("data" ("!@#" (4.5) "(more" "data)")))"#;
+        r#"(("data" "quoted data" 123 4.5) ("data" ("!@#" (4.5) "(more" "data)")))"#;
     assert_eq!(Ok(SEXP_STRING.to_string()), try_encode());
 }
 

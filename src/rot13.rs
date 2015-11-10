@@ -1,14 +1,14 @@
 // http://rosettacode.org/wiki/Rot-13
 
-fn rot13 (string: &str) -> String {
-    fn rot13u8 (c: char) -> char {
+fn rot13(string: &str) -> String {
+    fn rot13u8(c: char) -> char {
         let d = c as u8;
         match c {
-            'a' ... 'm'
-            | 'A' ... 'M' => (d + 13) as char,
-            'n' ... 'z'
-            | 'N' ... 'Z' => (d - 13) as char,
-            _ => c
+            'a'...'m' |
+            'A'...'M' => (d + 13) as char,
+            'n'...'z' |
+            'N'...'Z' => (d - 13) as char,
+            _ => c,
         }
     }
 
@@ -16,7 +16,7 @@ fn rot13 (string: &str) -> String {
 }
 
 #[cfg(not(test))]
-fn main () {
+fn main() {
     let string = "Do you love apples?";
 
     println!("Original: {}", string);

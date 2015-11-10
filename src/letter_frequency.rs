@@ -10,14 +10,18 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 
 fn count_chars<T>(chars: T) -> HashMap<char, usize>
-    where T : Iterator<Item=char>
+    where T: Iterator<Item = char>
 {
     let mut map: HashMap<char, usize> = HashMap::new();
     for letter in chars {
         match map.entry(letter) {
-            Vacant(entry) => { entry.insert(1); },
-            Occupied(mut entry) => { *entry.get_mut() += 1; }
-        };
+            Vacant(entry) => {
+                entry.insert(1);
+            }
+            Occupied(mut entry) => {
+                *entry.get_mut() += 1;
+            }
+        }
     }
     map
 }

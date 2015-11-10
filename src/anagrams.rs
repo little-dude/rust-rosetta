@@ -1,6 +1,8 @@
 // http://rosettacode.org/wiki/Anagrams
-#[cfg(not(test))] use std::fs::File;
-#[cfg(not(test))] use std::io::{BufReader, BufRead};
+#[cfg(not(test))]
+use std::fs::File;
+#[cfg(not(test))]
+use std::io::{BufReader, BufRead};
 use std::collections::{HashMap, HashSet};
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 
@@ -12,7 +14,7 @@ fn sorted_characters(string: &str) -> String {
 
 /// Returns groups of anagrams where each group consists of a set
 /// containing the words
-fn anagrams<T: Iterator<Item=String>>(lines: T) -> HashMap<String, HashSet<String>> {
+fn anagrams<T: Iterator<Item = String>>(lines: T) -> HashMap<String, HashSet<String>> {
     let mut groups = HashMap::new();
 
     // Make groups of words according to the letters they contain
@@ -31,21 +33,24 @@ fn anagrams<T: Iterator<Item=String>>(lines: T) -> HashMap<String, HashSet<Strin
 }
 
 /// Returns the groups of anagrams that contain the most words in them
-fn largest_groups(groups: &HashMap<String, HashSet<String>>)
-                      -> HashMap<String, HashSet<String>> {
-    let max_length = groups.iter().map(|(_, group)| group.len())
-                                  .max().unwrap();
-    groups.iter().filter_map(|(key, group)| {
-        if group.len() == max_length {
-            Some((key.clone(), group.clone()))
-        } else {
-            None
-        }
-    }).collect()
+fn largest_groups(groups: &HashMap<String, HashSet<String>>) -> HashMap<String, HashSet<String>> {
+    let max_length = groups.iter()
+                           .map(|(_, group)| group.len())
+                           .max()
+                           .unwrap();
+    groups.iter()
+          .filter_map(|(key, group)| {
+              if group.len() == max_length {
+                  Some((key.clone(), group.clone()))
+              } else {
+                  None
+              }
+          })
+          .collect()
 }
 
 #[cfg(not(test))]
-fn main () {
+fn main() {
     let reader = BufReader::new(File::open("src/resources/unixdict.txt").unwrap());
     let lines = reader.lines().map(|l| l.unwrap());
 
@@ -67,8 +72,7 @@ fn basic_test() {
         s.iter().map(|s| s.to_string()).collect()
     };
 
-    fn assert_has_value(map: &HashMap<String, HashSet<String>>,
-                        set: &HashSet<String>) {
+    fn assert_has_value(map: &HashMap<String, HashSet<String>>, set: &HashSet<String>) {
         assert!(map.values().any(|v| v == set));
     }
 

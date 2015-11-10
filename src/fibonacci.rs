@@ -17,16 +17,16 @@ fn main() {
 fn fib_recursive(n: u64) -> u64 {
     match n {
         0 | 1 => n,
-        n => fib_recursive(n - 1) + fib_recursive(n - 2)
+        n => fib_recursive(n - 1) + fib_recursive(n - 2),
     }
 }
 
 // tail recursive version
 fn fib_tail_recursive(n: u64) -> u64 {
-    fn in_fib(n : u64, current : u64, next : u64) -> u64 {
+    fn in_fib(n: u64, current: u64, next: u64) -> u64 {
         match n {
             0 => current,
-            n => in_fib(n - 1, next, current + next)
+            n => in_fib(n - 1, next, current + next),
         }
     }
 
@@ -62,8 +62,8 @@ mod test {
     #[test]
     fn fib_values() {
         let fns = vec![fib_recursive as fn(u64) -> u64,
-            fib_tail_recursive as fn(u64) -> u64,
-            fib_iterative as fn(u64) -> u64];
+                       fib_tail_recursive as fn(u64) -> u64,
+                       fib_iterative as fn(u64) -> u64];
         for &f in &fns {
             tester(f);
         }

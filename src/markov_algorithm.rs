@@ -5,18 +5,22 @@
 struct MarkovRule {
     pattern: String,
     replacement: String,
-    stop: bool
+    stop: bool,
 }
 
 impl MarkovRule {
     fn new(pattern: String, replacement: String, stop: bool) -> MarkovRule {
-        MarkovRule {pattern: pattern, replacement: replacement, stop: stop}
+        MarkovRule {
+            pattern: pattern,
+            replacement: replacement,
+            stop: stop,
+        }
     }
 }
 
 // The complete markov algorithm
 struct MarkovAlgorithm {
-    rules: Vec<MarkovRule>
+    rules: Vec<MarkovRule>,
 }
 
 impl MarkovAlgorithm {
@@ -24,8 +28,9 @@ impl MarkovAlgorithm {
     pub fn from_str(s: &str) -> Result<MarkovAlgorithm, String> {
         let mut rules: Vec<MarkovRule> = vec![];
         for line in s.lines()
-            .map(|l| l.trim()) // Ignore whitespace before and after
-            .filter(|l| l.chars().count() > 0 && l.char_at(0) != '#') { // Ignore comments
+                     .map(|l| l.trim())
+                     .filter(|l| l.chars().count() > 0 && l.char_at(0) != '#') {
+            // Ignore comments
 
             // check for -> (must be preceded by whitespace)
             // invalid ruleset if absent
@@ -48,16 +53,21 @@ impl MarkovAlgorithm {
                     let stop = (line_end.chars().count() > 0) && (line_end.char_at(0) == '.');
 
                     // extract replacement
-                    let replacement = if stop {&line_end[1..]} else {line_end};
+                    let replacement = if stop {
+                        &line_end[1..]
+                    } else {
+                        line_end
+                    };
 
                     // add to rules
                     let new_rule = MarkovRule::new(pattern.to_string(),
-                                            replacement.to_string(), stop);
+                                                   replacement.to_string(),
+                                                   stop);
                     rules.push(new_rule);
                 }
             }
         }
-        let rule_set = MarkovAlgorithm{rules: rules};
+        let rule_set = MarkovAlgorithm { rules: rules };
         Ok(rule_set)
     }
 
@@ -74,13 +84,15 @@ impl MarkovAlgorithm {
         loop {
             // find the first rule that is applicable
             // (pattern string is in state)
-            let possible_rule = self.rules.iter().find(|rule|{
-                state.find(&rule.pattern[..]).is_some()
-            });
+            let possible_rule = self.rules
+                                    .iter()
+                                    .find(|rule| state.find(&rule.pattern[..]).is_some());
 
             match possible_rule {
                 // stop if no rule found
-                None => { break; }
+                None => {
+                    break;
+                }
                 Some(rule) => {
                     // replace the first instance (only) of the pattern
                     // Note: cannot use str::replace as that replaces all instances
@@ -98,7 +110,9 @@ impl MarkovAlgorithm {
                     state = format!("{}{}{}", left, rule.replacement, right);
 
                     // stop if required
-                    if rule.stop { break; }
+                    if rule.stop {
+                        break;
+                    }
                 }
             }
         }
@@ -111,111 +125,132 @@ impl MarkovAlgorithm {
 struct RCSample<'a> {
     ruleset: &'a str,
     input: &'a str,
-    expected_result: &'a str
+    expected_result: &'a str,
 }
 
 // Sample markow algorithms from rosetta code
 // The extra whitespaces are trimmed when MarkovAlgorithm::from_str is called
 fn get_samples<'a>() -> [RCSample<'a>; 5] {
-    [
-        RCSample {
-            ruleset:
-                "# This rules file is extracted from Wikipedia:
-                # http://en.wikipedia.org/wiki/Markov_Algorithm
+    [RCSample {
+         ruleset: "# This rules file is extracted from Wikipedia:
+                # \
+                   http://en.wikipedia.org/wiki/Markov_Algorithm
                 A -> apple
-                B -> bag
+                \
+                   B -> bag
                 S -> shop
                 T -> the
-                the shop -> my brother
+                the \
+                   shop -> my brother
                 a never used -> .terminating rule",
-            input: "I bought a B of As from T S.",
-            expected_result: "I bought a bag of apples from my brother.",
-        },
-        RCSample{
-            ruleset:
-                "# Slightly modified from the rules on Wikipedia
+         input: "I bought a B of As from T S.",
+         expected_result: "I bought a bag of apples from my brother.",
+     },
+     RCSample {
+         ruleset: "# Slightly modified from the rules on Wikipedia
                 A -> apple
-                B -> bag
+                \
+                   B -> bag
                 S -> .shop
                 T -> the
-                the shop -> my brother
+                \
+                   the shop -> my brother
                 a never used -> .terminating rule",
-            input: "I bought a B of As from T S.",
-            expected_result: "I bought a bag of apples from T shop.",
-        },
-        RCSample{
-            ruleset:
-                "# BNF Syntax testing rules
+         input: "I bought a B of As from T S.",
+         expected_result: "I bought a bag of apples from T shop.",
+     },
+     RCSample {
+         ruleset: "# BNF Syntax testing rules
                 A -> apple
-                WWWW -> with
+                WWWW -> \
+                   with
                 Bgage -> ->.*
                 B -> bag
-                ->.* -> money
+                \
+                   ->.* -> money
                 W -> WW
                 S -> .shop
-                T -> the
+                \
+                   T -> the
                 the shop -> my brother
-                a never used -> .terminating rule",
-            input: "I bought a B of As W my Bgage from T S.",
-            expected_result: "I bought a bag of apples with my money from T shop.",
-        },
-        RCSample{
-            ruleset:
-                "### Unary Multiplication Engine, for testing Markov Algorithm implementations
-                ### By Donal Fellows.
+                a never used -> \
+                   .terminating rule",
+         input: "I bought a B of As W my Bgage from T S.",
+         expected_result: "I bought a bag of apples with my money from T shop.",
+     },
+     RCSample {
+         ruleset: "### Unary Multiplication Engine, for testing Markov Algorithm implementations
+                \
+                   ### By Donal Fellows.
                 # Unary addition engine
-                _+1 -> _1+
+                \
+                   _+1 -> _1+
                 1+1 -> 11+
-                # Pass for converting from the splitting of multiplication into ordinary
+                # Pass for converting \
+                   from the splitting of multiplication into ordinary
                 # addition
-                1! -> !1
+                \
+                   1! -> !1
                 ,! -> !+
                 _! -> _
-                # Unary multiplication by duplicating left side, right side times
-                1*1 -> x,@y
+                # \
+                   Unary multiplication by duplicating left side, right side times
+                \
+                   1*1 -> x,@y
                 1x -> xX
                 X, -> 1,1
-                X1 -> 1X
+                \
+                   X1 -> 1X
                 _x -> _X
                 ,x -> ,X
-                y1 -> 1y
+                y1 \
+                   -> 1y
                 y_ -> _
                 # Next phase of applying
-                1@1 -> x,@y
+                \
+                   1@1 -> x,@y
                 1@_ -> @_
                 ,@_ -> !_
-                ++ -> +
+                \
+                   ++ -> +
                 # Termination cleanup for addition
-                _1 -> 1
+                _1 \
+                   -> 1
                 1+_ -> 1
                 _+_ -> ",
-            input: "_1111*11111_",
-            expected_result: "11111111111111111111",
-        },
-        RCSample{
-            ruleset:
-                "# Turing machine: three-state busy beaver
+         input: "_1111*11111_",
+         expected_result: "11111111111111111111",
+     },
+     RCSample {
+         ruleset: "# Turing machine: three-state busy beaver
                 #
-                # state A, symbol 0 => write 1, move right, new state B
+                # \
+                   state A, symbol 0 => write 1, move right, new state B
                 A0 -> 1B
-                # state A, symbol 1 => write 1, move left, new state C
-                0A1 -> C01
+                \
+                   # state A, symbol 1 => write 1, move left, new state C
+                0A1 -> \
+                   C01
                 1A1 -> C11
-                # state B, symbol 0 => write 1, move left, new state A
+                # state B, symbol 0 => write 1, \
+                   move left, new state A
                 0B0 -> A01
                 1B0 -> A11
-                # state B, symbol 1 => write 1, move right, new state B
-                B1 -> 1B
+                \
+                   # state B, symbol 1 => write 1, move right, new state B
+                B1 -> \
+                   1B
                 # state C, symbol 0 => write 1, move left, new state B
-                0C0 -> B01
+                \
+                   0C0 -> B01
                 1C0 -> B11
-                # state C, symbol 1 => write 1, move left, halt
+                # state C, symbol 1 => \
+                   write 1, move left, halt
                 0C1 -> H01
                 1C1 -> H11",
-            input: "000000A000000",
-            expected_result: "00011H1111000",
-        },
-    ]
+         input: "000000A000000",
+         expected_result: "00011H1111000",
+     }]
 }
 
 #[cfg(not(test))]
@@ -227,7 +262,7 @@ fn main() {
                 println!("Output: {}", algorithm.apply(sample.input));
                 println!("Expected result: {}", sample.expected_result);
             }
-            Err(message) => println!("{}", message)
+            Err(message) => println!("{}", message),
         }
     }
 }
@@ -236,9 +271,8 @@ fn main() {
 fn test_samples() {
     for sample in &get_samples() {
         match MarkovAlgorithm::from_str(sample.ruleset) {
-            Ok(algorithm) => assert_eq!(sample.expected_result,
-                                        algorithm.apply(sample.input)),
-            Err(message) => panic!("{}", message)
+            Ok(algorithm) => assert_eq!(sample.expected_result, algorithm.apply(sample.input)),
+            Err(message) => panic!("{}", message),
         }
     }
 }

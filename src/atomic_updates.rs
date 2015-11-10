@@ -56,17 +56,17 @@ mod buckets {
     pub const N_WORKERS: usize = 2;
 
     struct Bucket {
-        data: AtomicUsize,       // The actual data.  It is atomic because it is read (not written)
-                                // outside the Mutex, unless a consistent snapshot is required.
-        mutex: Mutex<()>,       // The mutex used to synchronize writes and snapshot reads of the
-                                // bucket.
-                                // As the D solution says, using a per-bucket Mutex dramatically
-                                // improves scalability compared to the alternatives.
+        data: AtomicUsize, // The actual data.  It is atomic because it is read (not written)
+        // outside the Mutex, unless a consistent snapshot is required.
+        mutex: Mutex<()>, /* The mutex used to synchronize writes and snapshot reads of the
+                           * bucket.
+                           * As the D solution says, using a per-bucket Mutex dramatically
+                           * improves scalability compared to the alternatives. */
     }
 
     pub struct Buckets {
-        buckets: [Bucket; N_BUCKETS ], // Buckets containing values to be transferred.
-        transfers: [AtomicUsize; N_WORKERS ], // Statistics about total transfers this go-around.
+        buckets: [Bucket; N_BUCKETS], // Buckets containing values to be transferred.
+        transfers: [AtomicUsize; N_WORKERS], // Statistics about total transfers this go-around.
     }
 
     impl Buckets {
@@ -79,8 +79,11 @@ mod buckets {
             // buckets).
             let mut buckets_: [Bucket; N_BUCKETS] = unsafe { ::std::mem::uninitialized() };
             let mut transfers: [AtomicUsize; N_WORKERS] = unsafe { ::std::mem::uninitialized() };
-            for (dest, &src) in buckets_.iter_mut().zip(buckets.iter()){
-                let bucket = Bucket { data: AtomicUsize::new(src), mutex: Mutex::new(()) };
+            for (dest, &src) in buckets_.iter_mut().zip(buckets.iter()) {
+                let bucket = Bucket {
+                    data: AtomicUsize::new(src),
+                    mutex: Mutex::new(()),
+                };
                 // If we don't use an unsafe write(), the uninitialized mutex in the bucket will be
                 // dropped.
                 unsafe { ::std::ptr::write(dest as *mut _, bucket) }
@@ -88,14 +91,17 @@ mod buckets {
             for t in (&mut transfers[..]).iter_mut() {
                 *t = AtomicUsize::new(0);
             }
-            Buckets { buckets: buckets_, transfers: transfers }
+            Buckets {
+                buckets: buckets_,
+                transfers: transfers,
+            }
         }
 
         // Get the value of the bucket at index i, or None if out of bounds.
         pub fn get(&self, i: usize) -> Option<usize> {
             // This is used as an estimate, and is used without the mutex lock, so there's no
             // compelling reason to demand consistency here.
-            self.buckets.get(i).map( |b| b.data.load(Ordering::Relaxed) )
+            self.buckets.get(i).map(|b| b.data.load(Ordering::Relaxed))
         }
 
         // Transfer at most `amount` from the bucket at index `from` to that at index `to`, and
@@ -104,7 +110,9 @@ mod buckets {
         pub fn transfer(&self, from: usize, to: usize, amount: usize, worker: usize) {
             // The from == to check is important so we don't deadlock, since Rust mutexes are
             // nonreentrant.
-            if from == to || N_BUCKETS <= from || N_BUCKETS <= to || N_WORKERS <= worker { return }
+            if from == to || N_BUCKETS <= from || N_BUCKETS <= to || N_WORKERS <= worker {
+                return;
+            }
             // We know this won't fail, and the compiler seems to know as well.  However, if it
             // *did* fail, it wouldn't fail while we were holding mutexes (which can cause
             // problems since they may need to poison other tasks).
@@ -113,7 +121,11 @@ mod buckets {
             // It's very important to lock our Mutexes in the same order everywhere to avoid
             // deadlock.  We arbitrarily choose the convention that we lock in ascending index
             // order.
-            let (low, high) = if from < to { (b1, b2) } else { (b2, b1) };
+            let (low, high) = if from < to {
+                (b1, b2)
+            } else {
+                (b2, b1)
+            };
             {
                 // The reason we introduce a new scope here is that we want to make it clear how
                 // long we're locking for.  Locks should be held as briefly as possible and
@@ -136,7 +148,7 @@ mod buckets {
 
         // Acquire a consistent snapshot of the state of the bucket list.  This should maintain the
         // invariant that total buckets are conserved.  Also returns the list of transfer counts.
-        pub fn snapshot(&self) -> ([usize; N_BUCKETS], [usize; N_WORKERS ]) {
+        pub fn snapshot(&self) -> ([usize; N_BUCKETS], [usize; N_WORKERS]) {
             // Since this method is called relatively rarely, we aren't too concerned about
             // performance here.
             let mut buckets = [0; N_BUCKETS];
@@ -145,7 +157,7 @@ mod buckets {
             // (so as to preserve consistency of the snapshot).
             let locks = buckets.iter_mut().zip(self.buckets.iter()).map( |(dest, src)| {
                 let lock = src.mutex.lock();
-                // Is SeqCst necessary here?  Maybe, maybe not, but when in doubt go with SeqCst.
+            // Is SeqCst necessary here?  Maybe, maybe not, but when in doubt go with SeqCst.
                 *dest = src.data.load(Ordering::SeqCst);
                 lock
             }).collect::<Vec<_>>();
@@ -213,8 +225,11 @@ fn randomize(bl: &buckets::Buckets, running: &AtomicBool, worker: usize) {
 // The display task--for a total time of `duration`, it displays information about the update
 // process and checks to make sure that the invariant (that the total remains constant) is
 // preserved.  It prints an update `nticks` times, evenly spaced.
-fn display(bl: &buckets::Buckets, running: &AtomicBool, original_total: usize,
-           duration: u32, nticks: u32) {
+fn display(bl: &buckets::Buckets,
+           running: &AtomicBool,
+           original_total: usize,
+           duration: u32,
+           nticks: u32) {
     println!("transfers, N. transfers, buckets, buckets sum:");
 
     let duration = duration / nticks;
@@ -237,8 +252,7 @@ fn display(bl: &buckets::Buckets, running: &AtomicBool, original_total: usize,
 }
 
 // Putting together all three tasks.
-fn perform_atomic_updates(duration: u32, original_total: usize, num_ticks: u32)
-{
+fn perform_atomic_updates(duration: u32, original_total: usize, num_ticks: u32) {
     // Worker IDs for the two updater tasks.
     const ID_EQUALIZE: usize = 0;
     const ID_RANDOMIZE: usize = 1;
@@ -252,10 +266,10 @@ fn perform_atomic_updates(duration: u32, original_total: usize, num_ticks: u32)
     // Cloning the arc bumps the reference count.
     let arc_ = arc.clone();
     // Start off the equalize task
-    spawn(move || { equalize(&arc_.0, &arc_.1, ID_EQUALIZE) });
+    spawn(move || equalize(&arc_.0, &arc_.1, ID_EQUALIZE));
     let arc_ = arc.clone();
     // Start off the randomize task
-    spawn(move || { randomize(&arc_.0, &arc_.1, ID_RANDOMIZE) });
+    spawn(move || randomize(&arc_.0, &arc_.1, ID_RANDOMIZE));
     let (ref bl, ref running) = *arc;
     // Run the display task in the current thread, so failure propagates to the user.
     display(bl, running, original_total, duration, num_ticks);

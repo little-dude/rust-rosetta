@@ -107,4 +107,3 @@ mod tests {
         assert_eq!(Err("base and modulus are not relatively prime"), result);
     }
 }
-

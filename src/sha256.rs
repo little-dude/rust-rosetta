@@ -23,6 +23,5 @@ fn sha_256(input: &str) -> String {
 #[test]
 fn test_rosetta() {
     assert_eq!(sha_256("Rosetta code"),
-    "764faf5c61ac315f1497f9dfa542713965b785e5cc2f707d6468d7d1124cdfcf"
-    .to_string());
+               "764faf5c61ac315f1497f9dfa542713965b785e5cc2f707d6468d7d1124cdfcf".to_string());
 }

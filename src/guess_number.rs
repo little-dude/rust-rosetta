@@ -14,7 +14,7 @@ fn main() {
         match line.trim().parse::<u8>() {
             Ok(guess) if guess == mystery_number => break,
             Ok(_) => println!("Wrong! Try again!"),
-            Err(_) => println!("Please enter an integer")
+            Err(_) => println!("Please enter an integer"),
         }
     }
 

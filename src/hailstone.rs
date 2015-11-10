@@ -4,13 +4,16 @@
 
 struct Hailstone {
     next: usize, // Accessible only to the current module.
-    pub start: usize  // Publically accessible.
+    pub start: usize, // Publically accessible.
 }
 
 impl Hailstone {
-  // Define a constructor for the struct.
+    // Define a constructor for the struct.
     fn new(n: usize) -> Hailstone {
-        Hailstone { next: n, start: n }
+        Hailstone {
+            next: n,
+            start: n,
+        }
     }
 }
 
@@ -26,8 +29,8 @@ impl Iterator for Hailstone {
             0 => {
                 // Resets the iterator.
                 self.next = self.start;
-                return None
-            },
+                return None;
+            }
             // At the end, yield 1 and roll over next time called.
             1 => 0,
             // Got an even.
@@ -43,9 +46,10 @@ impl Iterator for Hailstone {
 
 /// Returns the start number and length of the longest hailstone sequence up to `limit`
 fn biggest_hailstone(limit: usize) -> (usize, usize) {
-    (0..limit).map(|n| (n, Hailstone::new(n).count()))
-                    .max_by(|&(_, count)| count)
-                    .unwrap()
+    (0..limit)
+        .map(|n| (n, Hailstone::new(n).count()))
+        .max_by(|&(_, count)| count)
+        .unwrap()
 }
 
 #[cfg(not(test))]
@@ -54,10 +58,10 @@ fn main() {
     let two_seven = Hailstone::new(27).collect::<Vec<usize>>();
     let ts_len = two_seven.len();
     println!("Testing: {}, Length: {}, Values: {:?}...{:?}",
-            two_seven[0],
-            ts_len,
-            &two_seven[0..4],
-            &two_seven[ts_len - 4..]);
+             two_seven[0],
+             ts_len,
+             &two_seven[0..4],
+             &two_seven[ts_len - 4..]);
 
     // Find the longest.
     let (biggest, length) = biggest_hailstone(100000);

@@ -25,9 +25,9 @@ fn handle_event(duration: u32) -> u32 {
     let mut guard = mutex.lock().unwrap();
     // Start our secondary task (which will signal our waiting main task)
     spawn(move || {
-		let &(ref mutex_, ref cond_) = &*pair_;
+        let &(ref mutex_, ref cond_) = &*pair_;
         // Lock the mutex
-        let mut guard  = mutex_.lock().unwrap();
+        let mut guard = mutex_.lock().unwrap();
         *guard = true;
 
         // Sleep for `duration`.
@@ -43,10 +43,10 @@ fn handle_event(duration: u32) -> u32 {
         // Although we signaled the waiting mutex, it will not awaken until this guard is dropped.
     });
     // Wait for the event state to be set to signaled (equivalent to guard.cond.wait_on(0)).
-	while !*guard {
-		guard = cond.wait(guard).unwrap();
-	}
-	// Should be done signaling (i.e. we've waited for `duration`).
+    while !*guard {
+        guard = cond.wait(guard).unwrap();
+    }
+    // Should be done signaling (i.e. we've waited for `duration`).
     let end = time::precise_time_ns();
     // When the guard exits scope, the condvar is reset.
     drop(guard);
@@ -62,8 +62,9 @@ pub fn main() {
 
 #[test]
 pub fn test_events() {
-    if !cfg!(windows) { // overflowing on windows (bug in time library?)
-         let duration = 100; // Process event after one tenth of a second.
+    if !cfg!(windows) {
+        // overflowing on windows (bug in time library?)
+        let duration = 100; // Process event after one tenth of a second.
         // Make sure it really did take at least that long for the event to be processed.
 
         let out = handle_event(duration);

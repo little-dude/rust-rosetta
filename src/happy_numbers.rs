@@ -20,10 +20,10 @@ fn is_happy(mut x: usize) -> bool {
 
         // The number is not happy if there is an endless loop
         if past.contains(&x) {
-            return false
+            return false;
         }
 
-        //past.insert(x);
+        // past.insert(x);
         past.push(x);
     }
     true
@@ -33,9 +33,9 @@ fn is_happy(mut x: usize) -> bool {
 fn main() {
     // Print the first 8 happy numbers
     let v: Vec<usize> = (1..)
-        .filter(|x| is_happy(*x))
-        .take(8)
-        .collect();
+                            .filter(|x| is_happy(*x))
+                            .take(8)
+                            .collect();
     println!("{:?}", v)
 }
 

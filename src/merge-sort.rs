@@ -7,7 +7,7 @@ fn merge_sort<E: PartialOrd + Clone>(arr: &[E]) -> Vec<E> {
     if arr.len() <= 1 {
         return arr.to_vec();
     }
-    let midpoint = arr.len()/2;
+    let midpoint = arr.len() / 2;
     let left = merge_sort(&arr[0..midpoint]);
     let right = merge_sort(&arr[midpoint..]);
     merge(&left[..], &right[..])
@@ -63,6 +63,7 @@ mod test {
     #[test]
     fn random() {
         let arr = [12i32, 54, 2, 93, 13, 43, 15, 299, 234];
-        assert_eq!(merge_sort(&arr), vec![2i32, 12, 13, 15, 43, 54, 93, 234, 299]);
+        assert_eq!(merge_sort(&arr),
+                   vec![2i32, 12, 13, 15, 43, 54, 93, 234, 299]);
     }
 }

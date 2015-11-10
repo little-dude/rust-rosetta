@@ -29,37 +29,31 @@ fn largest_min_factor_chan(numbers: &[usize]) -> usize {
     // Send all the minimal factors
     for &x in numbers {
         let child_sender = sender.clone();
-        spawn(move || { child_sender.send(min_factor(x)).unwrap() });
+        spawn(move || child_sender.send(min_factor(x)).unwrap());
     }
 
     // Receive them and keep the largest one
-    numbers.iter().fold(0, |max, _| {
-        std::cmp::max(receiver.recv().unwrap(), max)
-    })
+    numbers.iter().fold(0, |max, _| std::cmp::max(receiver.recv().unwrap(), max))
 }
 
 // Returns the largest minimal factor of the numbers in a slice
 // The function is implemented using the Future struct from crate "eventual"
 fn largest_min_factor_fut(numbers: &[usize]) -> usize {
     // We will save the future values of the minimal factor in the results vec
-    let results: Vec<Future<usize, ()>>  = (0..numbers.len()).map(
-        |i| {
-            let number = numbers[i];
-            Future::spawn(move || { min_factor(number) })
-        }).collect();
+    let results: Vec<Future<usize, ()>> = (0..numbers.len())
+                                              .map(|i| {
+                                                  let number = numbers[i];
+                                                  Future::spawn(move || min_factor(number))
+                                              })
+                                              .collect();
     // Get the largest minimal factor of all results
-    results.into_iter().map(|f| f.await().ok().unwrap() ).max().unwrap()
+    results.into_iter().map(|f| f.await().ok().unwrap()).max().unwrap()
 }
 
 #[cfg(not(test))]
 fn main() {
     // Numbers to be factorized
-    let numbers = &[1122725,
-                   1125827,
-                   1122725,
-                   1152800,
-                   1157978,
-                   1099726];
+    let numbers = &[1122725, 1125827, 1122725, 1152800, 1157978, 1099726];
 
     let max = largest_min_factor_fut(numbers);
     println!("The largest minimal factor is {}", max);
@@ -74,12 +68,7 @@ fn test_basic() {
 
 #[test]
 fn test_equivalence() {
-    let numbers = &[1122725,
-                   1125827,
-                   1122725,
-                   1152800,
-                   1157978,
-                   1099726];
+    let numbers = &[1122725, 1125827, 1122725, 1152800, 1157978, 1099726];
     assert_eq!(largest_min_factor_chan(numbers),
-                largest_min_factor_fut(numbers));
+               largest_min_factor_fut(numbers));
 }

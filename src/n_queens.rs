@@ -20,19 +20,19 @@ fn main() {
     }
 }
 
-/*           _
-   ___  ___ | |_   _____ _ __
-  / __|/ _ \| \ \ / / _ \ '__/
-  \__ \ (_) | |\ V /  __/ |
-  |___/\___/|_| \_/ \___|_|
-
-*/
+//           _
+// ___  ___ | |_   _____ _ __
+// / __|/ _ \| \ \ / / _ \ '__/
+// \__ \ (_) | |\ V /  __/ |
+// |___/\___/|_| \_/ \___|_|
+//
+//
 
 // Solves n-queens using a depth-first, backtracking solution.
 // Returns the number of solutions for a given n.
 fn n_queens(n: i32) -> usize {
     // Pass off to our helper function.
-    return n_queens_helper((1 << n as usize) -1, 0, 0, 0);
+    return n_queens_helper((1 << n as usize) - 1, 0, 0, 0);
 }
 
 // The meat of the algorithm is in here, a recursive helper function
@@ -65,7 +65,7 @@ fn n_queens_helper(all_ones: i32, left_diags: i32, columns: i32, right_diags: i3
     // We get validSpots with some bit trickery. Effectively, each of the parameters
     // can be ORed together to create an integer with all the conflicts together,
     // which we then invert and limit by ANDing with all_ones, our special value
-    //from earlier.
+    // from earlier.
     let mut valid_spots = !(left_diags | columns | right_diags) & all_ones;
 
     // Since valid_spots contains 1s in all of the locations that
@@ -84,20 +84,19 @@ fn n_queens_helper(all_ones: i32, left_diags: i32, columns: i32, right_diags: i3
 
         // Make a recursive call. This is where we infer the conflicts
         // for the next row.
-        solutions += n_queens_helper(
-            all_ones,
-            // We add a conflict in the current spot and then shift left,
-            // which has the desired effect of moving all of the conflicts
-            // that are created by left diagonals to the left one square.
-            (left_diags | spot) << 1,
+        solutions += n_queens_helper(all_ones,
+                                     // We add a conflict in the current spot and then shift left,
+                                     // which has the desired effect of moving all of the conflicts
+                                     // that are created by left diagonals to the left one square.
+                                     (left_diags | spot) << 1,
 
-            // For columns we simply mark this column as filled by ORing
-            // in the currentSpot.
-            (columns | spot),
+                                     // For columns we simply mark this column as filled by ORing
+                                     // in the currentSpot.
+                                     (columns | spot),
 
-            // This is the same as the left_diag shift, except we shift
-            // right because these conflicts are caused by right diagonals.
-            (right_diags | spot) >> 1);
+                                     // This is the same as the left_diag shift, except we shift
+                                     // right because these conflicts are caused by right diagonals.
+                                     (right_diags | spot) >> 1);
     }
 
     // If columns is all blocked (i.e. if it is all ones) then we
@@ -122,23 +121,24 @@ fn semi_parallel_n_queens(n: i32) -> usize {
         valid_spots = valid_spots ^ spot;
         receivers.push(rx);
 
-        spawn( move || -> () {
+        spawn(move || -> () {
             tx.send(n_queens_helper(all_ones,
                                     (left_diags | spot) << 1,
                                     (columns | spot),
-                                    (right_diags | spot) >> 1)).unwrap();
+                                    (right_diags | spot) >> 1))
+              .unwrap();
         });
     }
 
     receivers.iter().map(|r| r.recv().unwrap()).fold(0, |a, b| a + b) +
-        ((columns == all_ones) as usize)
+    ((columns == all_ones) as usize)
 }
 
 // Tests
 
 #[test]
 fn test_n_queens() {
-    let real = vec!(1, 1, 0, 0, 2, 10, 4, 40, 92);
+    let real = vec![1, 1, 0, 0, 2, 10, 4, 40, 92];
     for num in 0..9i32 {
         assert_eq!(n_queens(num), real[num as usize]);
     }
@@ -146,7 +146,7 @@ fn test_n_queens() {
 
 #[test]
 fn test_parallel_n_queens() {
-    let real = vec!(1, 1, 0, 0, 2, 10, 4, 40, 92);
+    let real = vec![1, 1, 0, 0, 2, 10, 4, 40, 92];
     for num in 0..9i32 {
         assert_eq!(semi_parallel_n_queens(num), real[num as usize]);
     }
@@ -154,10 +154,14 @@ fn test_parallel_n_queens() {
 
 #[bench]
 fn bench_n_queens(b: &mut Bencher) {
-    b.iter(|| { test::black_box(n_queens(16)); });
+    b.iter(|| {
+        test::black_box(n_queens(16));
+    });
 }
 
 #[bench]
 fn bench_semi_parallel_n_queens(b: &mut Bencher) {
-    b.iter(|| { test::black_box(semi_parallel_n_queens(16)); });
+    b.iter(|| {
+        test::black_box(semi_parallel_n_queens(16));
+    });
 }

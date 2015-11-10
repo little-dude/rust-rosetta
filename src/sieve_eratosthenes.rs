@@ -10,10 +10,10 @@ fn int_sqrt(n: usize) -> usize {
 // Return the prime numbers up to limit
 fn simple_sieve(limit: usize) -> Vec<usize> {
     if limit < 2 {
-        return vec!();
+        return vec![];
     }
 
-    let mut primes: Vec<bool> = repeat(true).take(limit+1).collect();
+    let mut primes: Vec<bool> = repeat(true).take(limit + 1).collect();
 
     for prime in 2..(int_sqrt(limit) + 1) {
         if primes[prime] {

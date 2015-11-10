@@ -8,13 +8,13 @@ use std::ops::{Index, IndexMut};
 pub struct Color {
     pub red: u8,
     pub green: u8,
-    pub blue: u8
+    pub blue: u8,
 }
 
 pub struct Image {
     pub width: usize,
     pub height: usize,
-    pub data: Vec<Color>
+    pub data: Vec<Color>,
 }
 
 impl Image {
@@ -23,7 +23,8 @@ impl Image {
             width: width,
             height: height,
             data: ::std::iter::repeat(Default::default())
-				.take(width*height).collect(),
+                      .take(width * height)
+                      .collect(),
         }
     }
 
@@ -36,7 +37,7 @@ impl Image {
     pub fn write_ppm(&self, filename: &str) -> Result<(), Error> {
         let file = try!(File::create(filename));
         let mut writer = BufWriter::new(file);
-        try!(writeln!(&mut writer,"P6"));
+        try!(writeln!(&mut writer, "P6"));
         try!(write!(&mut writer, "{} {} {}\n", self.width, self.height, 255));
         for color in &(self.data) {
             for channel in &[color.red, color.green, color.blue] {
@@ -51,13 +52,13 @@ impl Index<(usize, usize)> for Image {
     type Output=Color;
 
     fn index<'a>(&'a self, (x, y): (usize, usize)) -> &'a Color {
-        &self.data[x + y*self.width]
+        &self.data[x + y * self.width]
     }
 }
 
 impl IndexMut<(usize, usize)> for Image {
     fn index_mut<'a>(&'a mut self, (x, y): (usize, usize)) -> &'a mut Color {
-        & mut self.data[x + y*self.width]
+        &mut self.data[x + y * self.width]
     }
 }
 
@@ -68,13 +69,17 @@ pub fn main() {
 
     for y in 0..10 {
         for x in 5..10 {
-            image[(x,y)] = Color { red: 255, green: 255, blue: 255 };
+            image[(x, y)] = Color {
+                red: 255,
+                green: 255,
+                blue: 255,
+            };
         }
     }
 
     for y in 0..10 {
         for x in 0..10 {
-            if image[(x,y)].red + image[(x,y)].green + image[(x,y)].blue == 0 {
+            if image[(x, y)].red + image[(x, y)].green + image[(x, y)].blue == 0 {
                 print!("#");
             } else {
                 print!(".");
@@ -111,14 +116,27 @@ mod test {
     #[test]
     fn setting() {
         let mut image = Image::new(3, 3);
-        image[(0,0)] = Color { red: 1, green: 1, blue: 1 };
-        assert_eq!(image[(0,0)], Color { red: 1, green: 1, blue: 1});
+        image[(0, 0)] = Color {
+            red: 1,
+            green: 1,
+            blue: 1,
+        };
+        assert_eq!(image[(0, 0)],
+                   Color {
+                       red: 1,
+                       green: 1,
+                       blue: 1,
+                   });
     }
 
     #[test]
     fn filling() {
         let mut image = Image::new(4, 3);
-        let fill = Color { red: 3, green: 2, blue: 5};
+        let fill = Color {
+            red: 3,
+            green: 2,
+            blue: 5,
+        };
         image.fill(fill);
         for x in 0..4 {
             for y in 0..3 {

@@ -13,7 +13,7 @@ const FILENAME: &'static str = "resources/input.txt";
 
 enum Message {
     Line(String),
-    End
+    End,
 }
 
 fn printer(i_snd: Sender<i32>, msg_rcv: Receiver<Message>) {
@@ -24,7 +24,9 @@ fn printer(i_snd: Sender<i32>, msg_rcv: Receiver<Message>) {
                 println!("{}", line);
                 count += 1;
             }
-            Message::End => {break;}
+            Message::End => {
+                break;
+            }
         }
     }
     i_snd.send(count).unwrap();

@@ -8,9 +8,10 @@ use permutohedron::Heap;
 
 
 fn find_max(lst: &[f32]) -> Option<f32> {
-    if lst.is_empty() { return None }
-    let max = lst.iter().fold(f32::NEG_INFINITY,
-                              |a, &b| Float::max(a, b));
+    if lst.is_empty() {
+        return None;
+    }
+    let max = lst.iter().fold(f32::NEG_INFINITY, |a, &b| Float::max(a, b));
     Some(max)
 }
 
@@ -38,14 +39,14 @@ fn all_sums(vec: &mut [f32]) -> Vec<f32> {
     loop {
         let v = perms.next();
         match v {
-            Some(_v) =>  {
+            Some(_v) => {
                 let mut sum = 0.0f32;
                 for e in &_v {
                     sum += with_bits(*e, 1);
                 }
                 res.push(with_bits(sum, 1));
             }
-            None => break
+            None => break,
         }
     }
     res

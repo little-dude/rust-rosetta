@@ -7,8 +7,7 @@ extern crate libc;
 extern crate time;
 
 #[cfg(all(unix, not(test)))]
-fn main()
-{
+fn main() {
     use libc::consts::os::posix88::SIGINT;
     use libc::funcs::posix01::signal;
     use std::mem;
@@ -39,7 +38,9 @@ fn main()
     loop {
         std::thread::sleep_ms(duration);
         // Break if SIGINT was handled
-        if unsafe { GOT_SIGINT.load(Ordering::Acquire) } { break }
+        if unsafe { GOT_SIGINT.load(Ordering::Acquire) } {
+            break;
+        }
         // Otherwise, increment and display the integer and continue the loop.
         i += 1;
         println!("{}", i);
@@ -53,7 +54,6 @@ fn main()
 }
 
 #[cfg(not(unix))]
-fn main()
-{
+fn main() {
     println!("Not supported on this platform");
 }

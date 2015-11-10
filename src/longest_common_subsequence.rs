@@ -12,8 +12,7 @@ fn longest_common_subsequence(a: &str, b: &str) -> String {
             if a_char == b_char {
                 lengths[i + 1][j + 1] = lengths[i][j] + 1;
             } else {
-                lengths[i + 1][j + 1] = std::cmp::max(
-                        lengths[i + 1][j], lengths[i][j + 1]);
+                lengths[i + 1][j + 1] = std::cmp::max(lengths[i + 1][j], lengths[i][j + 1]);
             }
         }
     }

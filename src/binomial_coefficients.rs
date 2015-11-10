@@ -38,5 +38,5 @@ fn test_binomial() {
     assert_eq!(binomial(5, 3), 10.to_biguint().unwrap());
     assert_eq!(binomial(31, 17), 265182525.to_biguint().unwrap());
     assert_eq!(binomial(300, 30),
-        BigUint::from_str_radix("173193226149263513034110205899732811401360", 10).unwrap());
+               BigUint::from_str_radix("173193226149263513034110205899732811401360", 10).unwrap());
 }

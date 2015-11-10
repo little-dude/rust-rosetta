@@ -16,8 +16,7 @@ use syntax::ext::base::{ExtCtxt, MacResult, DummyResult, MacEager};
 use syntax::ext::build::AstBuilder;  // trait for expr_usize
 use rustc::plugin::Registry;
 
-fn exp_factorial(cx: &mut ExtCtxt, sp: Span, tts: &[TokenTree])
-        -> Box<MacResult + 'static> {
+fn exp_factorial(cx: &mut ExtCtxt, sp: Span, tts: &[TokenTree]) -> Box<MacResult + 'static> {
     // extract the argument and ensure there is only one and it's a usize
     let mut parser = parse::new_parser_from_tts(cx.parse_sess(), cx.cfg(), tts.to_vec());
 
@@ -34,14 +33,14 @@ fn exp_factorial(cx: &mut ExtCtxt, sp: Span, tts: &[TokenTree])
     // Take the number of the literal (if it is a number)
     let n: u64 = match literal.node {
         ast::LitInt(x, _) => x,
-         _              => {
+        _ => {
             cx.span_err(sp, "Invalid literal (expected unsigned integer)");
             return DummyResult::any(sp);
         }
     };
 
     // calculating the factorial
-    let result = (1..(n as usize)+1).fold(1, |accum, elem| accum * elem);
+    let result = (1..(n as usize) + 1).fold(1, |accum, elem| accum * elem);
 
     MacEager::expr(cx.expr_usize(sp, result))
 }

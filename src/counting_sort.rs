@@ -4,7 +4,7 @@ fn counting_sort(array: &mut [i32], min: i32, max: i32) {
 
     // nothing to do for arrays shorter than 2
     if array.len() < 2 {
-        return
+        return;
     }
 
     // we count occurences of values
@@ -79,4 +79,3 @@ mod test {
         check_sort(numbers, 2, 99);
     }
 }
-

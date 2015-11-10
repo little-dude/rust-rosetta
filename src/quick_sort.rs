@@ -8,7 +8,7 @@ use rand::{thread_rng, Rng};
 
 // We use in place quick sort
 // For details see http://en.wikipedia.org/wiki/Quicksort#In-place_version
-fn quick_sort<T: Ord>(v: &mut[T]) {
+fn quick_sort<T: Ord>(v: &mut [T]) {
     let len = v.len();
     if len < 2 {
         return;
@@ -20,7 +20,7 @@ fn quick_sort<T: Ord>(v: &mut[T]) {
     quick_sort(&mut v[0..pivot_index]);
 
     // Sort the right side
-    quick_sort(& mut v[pivot_index + 1..len]);
+    quick_sort(&mut v[pivot_index + 1..len]);
 }
 
 // Reorders the slice with values lower than the pivot at the left side,
@@ -64,8 +64,8 @@ fn main() {
 #[cfg(test)]
 fn check_sort<T: Ord>(v: &[T]) {
     if v.len() > 1 {
-        for i in 0..(v.len()-1) {
-            assert!(v[i] <= v[i+1]);
+        for i in 0..(v.len() - 1) {
+            assert!(v[i] <= v[i + 1]);
         }
     }
 }
@@ -115,7 +115,7 @@ fn test_already_sorted_vector() {
 #[test]
 fn test_random_numbers() {
     let mut rng = thread_rng();
-    let mut numbers : Vec<i32> = rng.gen_iter::<i32>().take(500).collect();
+    let mut numbers: Vec<i32> = rng.gen_iter::<i32>().take(500).collect();
     quick_sort(&mut numbers[..]);
     check_sort(&mut numbers[..]);
 }

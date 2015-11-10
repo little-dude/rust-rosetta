@@ -22,7 +22,7 @@ fn factor_int(x: i32) -> Vec<i32> {
     for i in 1i32..bound {
         if x % i == 0 {
             factors.push(i);
-            factors.push(x/i);
+            factors.push(x / i);
         }
     }
 

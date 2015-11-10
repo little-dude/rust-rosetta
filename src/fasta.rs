@@ -21,7 +21,7 @@ fn format_fasta<T: BufRead>(reader: &mut T) -> String {
                 out.push_str(": ");
             }
             // Other lines are just pushed
-            _ => out.push_str(ln)
+            _ => out.push_str(ln),
         }
         out
     })
@@ -41,6 +41,8 @@ fn main() {
 #[test]
 fn test_format_fasta() {
     let s = read_file();
-    assert_eq!(s, "Rosetta_Example_1: THERECANBENOSPACE
-Rosetta_Example_2: THERECANBESEVERALLINESBUTTHEYALLMUSTBECONCATENATED");
+    assert_eq!(s,
+               "Rosetta_Example_1: THERECANBENOSPACE
+Rosetta_Example_2: \
+                THERECANBESEVERALLINESBUTTHEYALLMUSTBECONCATENATED");
 }

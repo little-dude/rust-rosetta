@@ -2,7 +2,7 @@
 #[derive(Debug)]
 struct Stack<T> {
     // We use a vector because of simplicity
-    vec: Vec<T>
+    vec: Vec<T>,
 }
 
 impl<T> Stack<T> {
